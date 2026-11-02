@@ -1,0 +1,24 @@
+const assert=require('assert'),G=require('./game.js');let passed=0;
+function test(name,fn){try{fn();passed++;console.log('PASS',name)}catch(e){console.error('FAIL',name,e.message);process.exitCode=1}}
+const finish=(s,id,t)=>{assert.equal(G.start(s,id,t).ok,true);return G.sync(s,t+G.byId(id).durationMin*G.MINUTE_MS)};
+test('1 신규 게임 심심 지수 0',()=>assert.equal(G.create(1e9).boredom,0));
+test('2 취미 6종만 존재',()=>assert.deepEqual(G.HOBBIES.map(x=>x.id),['aion','fishing','jimook','seongwoo','friends','garden']));
+test('3 완료 시 지루함 증가',()=>{let s=G.create(1e9);finish(s,'garden',1e9);assert.equal(s.hobbies.garden.value,15)});
+test('4 반복 고정 보너스',()=>{let s=G.create(1e9),x=s.hobbies.aion;x.uses=3;assert.equal(G.expected(s,'aion'),25)});
+test('5 MAX 보상 1회',()=>{let s=G.create(1e9),x=s.hobbies.jimook;x.value=18;x.uses=4;let ev=finish(s,'jimook',1e9);assert.equal(s.boredom,2);G.sync(s,1e9+999999);assert.equal(s.boredom,2);assert.equal(ev.filter(x=>x.type==='max').length,1)});
+test('6 회복 중 재수행 차단',()=>{let s=G.create(1e9),x=s.hobbies.jimook;x.recoverUntil=1e9+5000;assert.equal(G.availability(s,'jimook',1e9).ok,false)});
+test('7 회복 후 수치 초기화',()=>{let s=G.create(1e9),x=s.hobbies.aion;x.value=100;x.uses=5;x.recoverUntil=1e9+1000;G.sync(s,1e9+1001);assert.deepEqual([x.value,x.uses],[0,0])});
+test('8 일반 취미 동시 수행 차단',()=>{let s=G.create(1e9);G.start(s,'aion',1e9);assert.equal(G.availability(s,'fishing',1e9).ok,false)});
+test('9 일반 취미 중 카톡 가능',()=>{let s=G.create(1e9);G.start(s,'aion',1e9);assert.equal(G.start(s,'jimook',1e9).ok,true)});
+test('10 카톡 일일 제한',()=>{let s=G.create(1e9);s.hobbies.seongwoo.dailyUses=5;assert.equal(G.availability(s,'seongwoo',1e9).ok,false)});
+test('11 자정 카톡 횟수 회복',()=>{let s=G.create(1e9);s.hobbies.jimook.dailyUses=20;G.sync(s,1e9+1440*1000);assert.equal(s.hobbies.jimook.dailyUses,0)});
+test('12 쿨타임은 시작 시점 기준',()=>{let s=G.create(1e9);G.start(s,'aion',1e9);assert.equal(s.hobbies.aion.cooldownUntil,1e9+1440*1000)});
+test('13 오프라인 중 완료 처리',()=>{let s=G.create(1e9);G.start(s,'fishing',1e9);G.sync(s,1e9+999*1000);assert.equal(s.hobbies.fishing.value,40)});
+test('14 직렬화 후 데이터 유지',()=>{let s=G.create(1e9);s.boredom=42;assert.equal(JSON.parse(JSON.stringify(s)).boredom,42)});
+test('15 심심 100 이벤트 조건',()=>{let s=G.create(1e9);s.boredom=100;assert.equal(G.acceptDate(s,1e9),true)});
+test('16 소개팅 거절 시 70',()=>{let s=G.create(1e9);s.boredom=100;G.rejectDate(s,1e9);assert.equal(s.boredom,70)});
+test('17 소개팅 수락 시 Step 1 클리어',()=>{let s=G.create(1e9);s.boredom=100;G.acceptDate(s,1e9);assert.equal(s.stepCleared,true)});
+test('18 새 게임은 전체 초기화',()=>{let s=G.create(1e9);assert.equal(s.hobbies.fishing.value,0);assert.equal(s.stepCleared,false)});
+test('19 심심 지수 최대 100',()=>{let s=G.create(1e9);s.boredom=99;let x=s.hobbies.fishing;x.value=190;x.uses=4;finish(s,'fishing',1e9);assert.equal(s.boredom,100)});
+test('20 오프라인 복원 중복 방지',()=>{let s=G.create(1e9);G.start(s,'garden',1e9);G.sync(s,1e9+61000);let v=s.hobbies.garden.value;G.sync(s,1e9+62000);assert.equal(s.hobbies.garden.value,v)});
+console.log(`RESULT ${passed}/20 passed`);if(passed!==20)process.exitCode=1;
