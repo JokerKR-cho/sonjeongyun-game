@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>손정윤 키우기 v0.1</title>
+  <style>
+    :root{--ink:#261b32;--cream:#fff4d2;--pink:#ff6f91;--purple:#7358d4;--mint:#66c6a5;--dark:#32294f;--sun:#ffd45e;--panel:#fff9e9}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#17142b;color:var(--ink);font-family:"Malgun Gothic",sans-serif;image-rendering:pixelated}
+    button{font:inherit;cursor:pointer;color:inherit}.pixel{border:4px solid var(--ink);box-shadow:4px 4px 0 #0006;border-radius:2px}
+    .game{width:min(1100px,100%);min-height:100vh;margin:auto;background:var(--cream);display:grid;grid-template-rows:auto auto 1fr auto}
+    header{background:var(--dark);color:white;padding:12px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-bottom:4px solid var(--ink)}
+    h1{font-size:clamp(18px,4vw,28px);margin:0;color:var(--sun);letter-spacing:1px}.clock{margin-left:auto;text-align:right;font-weight:bold}.sub{font-size:12px;color:#d9d1ff}
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px;background:#ffdda0;border-bottom:4px solid var(--ink)}
+    .meter{height:22px;background:#fff;border:3px solid var(--ink);position:relative;overflow:hidden}.fill{height:100%;transition:width .3s;background:var(--pink)}.fill.step{background:var(--mint)}
+    .statline{display:flex;justify-content:space-between;font-size:13px;font-weight:bold;margin-bottom:4px}
+    .progress-panel{display:none;margin:10px 12px 0;padding:10px;background:#dde5ff}.progress-panel.show{display:block}.progress-panel .meter{margin-top:6px}.progress-panel .fill{background:var(--purple)}
+    main{padding:12px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);gap:12px}
+    .scene{min-height:400px;position:relative;overflow:hidden;background:linear-gradient(#8fd6ff 0 55%,#82c56b 55%);display:flex;align-items:center;justify-content:center}
+    .scene:before{content:"";position:absolute;inset:auto 0 0;height:32%;background:repeating-linear-gradient(90deg,#c68754 0 48px,#b97849 48px 52px);border-top:5px solid var(--ink)}
+    .window{position:absolute;left:7%;top:12%;width:25%;height:27%;background:#9be4ff;border:6px solid #5b3d34;box-shadow:inset 0 0 0 4px #fff}.window:after{content:"☁";font-size:46px;color:#fff;position:absolute;left:22%;top:2%}
+    .desk{position:absolute;bottom:20%;right:9%;width:34%;height:12%;background:#9b5b3c;border:5px solid var(--ink)}.desk:after{content:"💻";position:absolute;font-size:55px;left:35%;bottom:60%}
+    .character{position:relative;z-index:2;width:128px;height:180px;animation:bob 1s steps(2) infinite;filter:drop-shadow(7px 8px 0 #0004)}
+    .head{position:absolute;top:10px;left:28px;width:72px;height:72px;background:#f5c69c;border:5px solid var(--ink);border-radius:18px}.hair{position:absolute;inset:-6px -6px auto;height:34px;background:#292036;border:5px solid var(--ink);border-radius:14px 14px 5px 5px}.eyes{position:absolute;top:36px;left:13px;font-weight:900;letter-spacing:18px}.body{position:absolute;top:82px;left:18px;width:92px;height:76px;background:#79a6e8;border:5px solid var(--ink)}.legs{position:absolute;top:153px;left:28px;width:24px;height:28px;background:#34334f;border:5px solid var(--ink);box-shadow:47px 0 0 #34334f,47px 0 0 4px var(--ink)}
+    .bubble{position:absolute;z-index:3;top:8%;right:5%;max-width:48%;padding:10px;background:#fff;font-weight:bold}.bubble:after{content:"";position:absolute;left:15px;bottom:-14px;border:8px solid transparent;border-top-color:var(--ink)}
+    @keyframes bob{50%{transform:translateY(5px)}}
+    .side{display:flex;flex-direction:column;gap:10px}.panel{background:var(--panel);padding:12px}.panel h2{font-size:17px;margin:0 0 10px}.hobbies{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.hobby{background:white;border:3px solid var(--ink);padding:8px 4px;min-height:76px}.hobby:hover:not(:disabled){transform:translate(-2px,-2px);box-shadow:3px 3px 0 var(--ink)}.hobby:disabled{opacity:.48;cursor:not-allowed}.emoji{font-size:27px;display:block}.mini{font-size:11px;display:block;margin-top:3px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.actions button{padding:9px;border:3px solid var(--ink);background:#fff}.actions .kakao{background:#ffe64d}.actions .date{background:#ff9eb3}.date:disabled{opacity:.5}
+    footer{padding:9px 14px;background:var(--dark);color:#d9d1ff;text-align:center;font-size:11px;border-top:4px solid var(--ink)}
+    .modal-wrap{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:10;padding:14px}.modal-wrap.show{display:flex}.modal{width:min(520px,100%);max-height:88vh;overflow:auto;background:var(--panel);padding:18px}.modal h2{margin-top:0;color:var(--purple)}.modal-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:15px}.modal button{border:3px solid var(--ink);background:#fff;padding:8px 14px;font-weight:bold}.modal .primary{background:var(--sun)}.modal .danger{background:#ff9a9a}.diary{list-style:none;padding:0;margin:0}.diary li{border-bottom:2px dashed #b6a98d;padding:8px 2px;font-size:13px}.toast{position:fixed;right:18px;bottom:18px;z-index:20;background:var(--dark);color:white;border:4px solid var(--sun);padding:12px;max-width:330px;transform:translateY(150%);transition:.25s}.toast.show{transform:none}
+    .rules{font-size:12px;line-height:1.6;background:#f1e7ce;padding:10px;border:2px solid #b6a98d}.tag{display:inline-block;padding:2px 5px;background:#e7ddff;border:2px solid var(--ink);font-size:11px}
+    @media(max-width:760px){main{grid-template-columns:1fr}.scene{min-height:350px}.stats{grid-template-columns:1fr}.clock{width:100%;text-align:left;margin:0}.bubble{max-width:55%;font-size:13px}.hobbies{grid-template-columns:repeat(3,1fr)}}
+  </style>
+</head>
+<body>
+<div class="game">
+  <header><h1>🎮 손정윤 키우기 <small>v0.1</small></h1><div class="clock"><div id="gameClock">DAY 1 · 08:00</div><div class="sub">현실 1분 = 게임 1시간 · 자동 저장</div></div></header>
+  <section>
+    <div class="stats">
+      <div><div class="statline"><span>💭 심심 지수</span><span id="boredomText">0 / 100</span></div><div class="meter"><div class="fill" id="boredomFill"></div></div></div>
+      <div><div class="statline"><span>💘 소개팅 진행</span><span id="stepText">0 / 100</span></div><div class="meter"><div class="fill step" id="stepFill"></div></div></div>
+    </div>
+    <div class="progress-panel pixel" id="progressPanel"><b id="progressTitle"></b><span id="progressRemain" style="float:right"></span><div class="meter"><div class="fill" id="progressFill"></div></div><small>다른 취미는 잠시 쉬는 중 · 카톡은 병행 가능</small></div>
+  </section>
+  <main>
+    <section class="scene pixel" id="scene"><div class="window"></div><div class="desk"></div><div class="bubble pixel" id="bubble">“아… 오늘은 뭐 하지?”</div><div class="character" aria-label="손정윤 캐릭터"><div class="head"><div class="hair"></div><div class="eyes">• •</div></div><div class="body"></div><div class="legs"></div></div></section>
+    <aside class="side">
+      <section class="panel pixel"><h2>오늘의 취미</h2><div class="hobbies" id="hobbyGrid"></div></section>
+      <section class="panel pixel"><h2>빠른 행동</h2><div class="actions"><button class="kakao" id="kakaoBtn">💬 카톡<br><small id="kakaoCount">0 / 20</small></button><button class="date" id="dateBtn" disabled>💌 소개팅<br><small>심심 100 필요</small></button><button id="diaryBtn">📔 일기장</button><button id="settingsBtn">⚙ 설정</button></div></section>
+    </aside>
+  </main>
+  <footer>모든 진행은 이 브라우저에 자동 저장됩니다. 브라우저를 닫아도 게임 시간과 활동이 이어집니다.</footer>
+</div>
+<div class="modal-wrap" id="modalWrap"><div class="modal pixel" id="modal"></div></div><div class="toast pixel" id="toast"></div>
+<script>
+const HOBBIES=[
+ {id:'aion',name:'아이온2',icon:'⚔️',duration:3,cooldown:6,gain:25,recover:18,reward:15,line:'이번 판만 하고 끈다.'},
+ {id:'youtube',name:'유튜브',icon:'📺',duration:2,cooldown:4,gain:18,recover:14,reward:12,line:'추천 영상 하나만 더…'},
+ {id:'webtoon',name:'웹툰',icon:'📖',duration:2,cooldown:5,gain:20,recover:16,reward:12,line:'여기서 끊는다고?'},
+ {id:'drive',name:'드라이브',icon:'🚗',duration:4,cooldown:10,gain:32,recover:24,reward:18,line:'바람 좀 쐬고 올까.'},
+ {id:'cafe',name:'카페 가기',icon:'☕',duration:3,cooldown:8,gain:27,recover:20,reward:16,line:'커피 마시면 좀 낫겠지.'},
+ {id:'walk',name:'산책',icon:'🌙',duration:1,cooldown:3,gain:12,recover:10,reward:10,line:'일단 걷고 보자.'}
+];
+const KEY='sonjeongyun-game-v01'; const realHour=60000;
+function fresh(){return{version:1,startAt:Date.now()-8*realHour,lastSeen:Date.now(),boredom:0,step:0,kakao:0,kakaoDay:1,active:null,hobbies:Object.fromEntries(HOBBIES.map(h=>[h.id,{boredom:0,uses:0,availableAt:0,recoverAt:0}])),logs:[],dateDone:false}}
+let state=load(); let modalAction=null;
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY));return x?.version===1?Object.assign(fresh(),x):fresh()}catch{return fresh()}}
+function save(){state.lastSeen=Date.now();localStorage.setItem(KEY,JSON.stringify(state))}
+function gameHours(t=Date.now()){return Math.max(8,Math.floor((t-state.startAt)/realHour))} function gameDay(t=Date.now()){return Math.floor(gameHours(t)/24)+1}
+function stamp(){const h=gameHours(),d=Math.floor(h/24)+1,hh=h%24;return `DAY ${d} · ${String(hh).padStart(2,'0')}:00`}
+function log(msg){state.logs.unshift({t:stamp(),msg});state.logs=state.logs.slice(0,80)}
+function fmt(ms){if(ms<=0)return'가능';const s=Math.ceil(ms/1000);return s<60?`${s}초`:`${Math.ceil(s/60)}분`}
+function sync(){const now=Date.now(),day=gameDay();if(day!==state.kakaoDay){state.kakaoDay=day;state.kakao=0;log('새로운 하루! 카톡 횟수가 회복됐다.')}if(state.active&&now>=state.active.endAt)finishActive(state.active.endAt<state.lastSeen);updateRecovery(now);save()}
+function updateRecovery(now){HOBBIES.forEach(h=>{const x=state.hobbies[h.id];if(x.recoverAt&&now>=x.recoverAt){x.recoverAt=0;x.boredom=0;log(`${h.name}의 지루함이 회복되어 다시 이용할 수 있다.`)}})}
+function finishActive(offline=false){const h=HOBBIES.find(x=>x.id===state.active.id),x=state.hobbies[h.id],before=x.boredom;x.boredom=Math.min(100,x.boredom+h.gain);x.uses++;x.availableAt=state.active.endAt+h.cooldown*realHour;state.active=null;log(`${h.icon} ${h.name} 완료: 지루함 ${before} → ${x.boredom}.`);if(x.boredom>=100){x.recoverAt=Date.now()+h.recover*realHour;state.boredom=Math.min(100,state.boredom+h.reward);log(`MAX! ${h.name}에 질려 심심 지수 +${h.reward}.`);setTimeout(()=>showMax(h),50)}else toast(`${offline?'오프라인 중 ':''}${h.name} 완료! 지루함 +${h.gain}`)}
+function hobbyStatus(h){const x=state.hobbies[h.id],now=Date.now();if(x.recoverAt>now)return`회복 ${fmt(x.recoverAt-now)}`;if(x.availableAt>now)return`대기 ${fmt(x.availableAt-now)}`;return`지루함 ${x.boredom}/100`}
+function canUse(h){const x=state.hobbies[h.id],now=Date.now();return!state.active&&x.recoverAt<=now&&x.availableAt<=now}
+function render(){sync();document.querySelector('#gameClock').textContent=stamp();document.querySelector('#boredomText').textContent=`${state.boredom} / 100`;document.querySelector('#boredomFill').style.width=state.boredom+'%';document.querySelector('#stepText').textContent=`${state.step} / 100`;document.querySelector('#stepFill').style.width=state.step+'%';document.querySelector('#kakaoCount').textContent=`${state.kakao} / 20`;document.querySelector('#dateBtn').disabled=state.boredom<100||state.dateDone;
+ const grid=document.querySelector('#hobbyGrid');grid.innerHTML=HOBBIES.map(h=>`<button class="hobby" data-id="${h.id}" ${canUse(h)?'':'disabled'}><span class="emoji">${h.icon}</span><b>${h.name}</b><span class="mini">${hobbyStatus(h)}</span></button>`).join('');grid.querySelectorAll('button').forEach(b=>b.onclick=()=>openHobby(b.dataset.id));
+ const p=document.querySelector('#progressPanel');if(state.active){const h=HOBBIES.find(x=>x.id===state.active.id),all=state.active.endAt-state.active.startAt,left=state.active.endAt-Date.now();p.classList.add('show');document.querySelector('#progressTitle').textContent=`${h.icon} ${h.name} 하는 중`;document.querySelector('#progressRemain').textContent=fmt(left);document.querySelector('#progressFill').style.width=Math.max(0,Math.min(100,(1-left/all)*100))+'%';document.querySelector('#bubble').textContent=`“${h.line}”`}else{p.classList.remove('show');document.querySelector('#bubble').textContent=state.boredom>=100?'“이제… 소개팅이라도?”':'“아… 오늘은 뭐 하지?”'} }
+function openHobby(id){const h=HOBBIES.find(x=>x.id===id),x=state.hobbies[id];show(`<h2>${h.icon} ${h.name}</h2><p><span class="tag">${x.boredom}/100</span> 이번 활동 후 +${h.gain} · ${h.duration} 게임시간</p><div class="rules">이용 주기: ${h.cooldown}시간<br>MAX 보상: 심심 지수 +${h.reward}<br>MAX 회복: ${h.recover}시간 후 지루함 0<br>반복 횟수: ${x.uses}회</div><div class="modal-buttons"><button data-close>취소</button><button class="primary" id="startHobby">취미 시작</button></div>`);document.querySelector('#startHobby').onclick=()=>{state.active={id,startAt:Date.now(),endAt:Date.now()+h.duration*realHour};log(`${h.icon} ${h.name}을 시작했다.`);close();save();render()}}
+function showMax(h){show(`<h2>✨ 지루함 MAX!</h2><p><b>${h.name}에 완전히 질려버렸습니다.</b></p><p>“아… ${h.name}도 이제 재미없네.”</p><div class="rules">심심 지수 +${h.reward}<br>${h.recover} 게임시간 동안 이용 불가<br>회복 후 지루함은 0으로 초기화</div><div class="modal-buttons"><button class="primary" data-close>확인</button></div>`)}
+function show(html){document.querySelector('#modal').innerHTML=html;document.querySelector('#modalWrap').classList.add('show');document.querySelectorAll('[data-close]').forEach(x=>x.onclick=close)}function close(){document.querySelector('#modalWrap').classList.remove('show')}
+function toast(msg){const t=document.querySelector('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t.timer);t.timer=setTimeout(()=>t.classList.remove('show'),3000)}
+document.querySelector('#kakaoBtn').onclick=()=>{sync();if(state.kakao>=20)return toast('오늘은 카톡을 20번 모두 보냈어요.');state.kakao++;const gain=state.kakao%5===0?3:1;state.boredom=Math.min(100,state.boredom+gain);log(`💬 카톡을 보냈다. 심심 지수 +${gain}.`);toast(`카톡 완료! 심심 지수 +${gain}`);save();render()};
+document.querySelector('#diaryBtn').onclick=()=>show(`<h2>📔 손정윤의 일기</h2><ul class="diary">${state.logs.length?state.logs.map(x=>`<li><b>${x.t}</b><br>${x.msg}</li>`).join(''):'<li>아직 기록이 없습니다.</li>'}</ul><div class="modal-buttons"><button data-close>닫기</button></div>`);
+document.querySelector('#settingsBtn').onclick=()=>show(`<h2>⚙ 설정</h2><p>진행은 자동 저장됩니다.</p><div class="rules">현실 1분 = 게임 1시간<br>취미 진행 중에도 카톡 가능<br>일기장은 최근 80개 기록 보관</div><div class="modal-buttons"><button data-close>닫기</button><button class="danger" id="resetBtn">새 게임</button></div>`);
+document.addEventListener('click',e=>{if(e.target.id==='resetBtn'&&confirm('저장된 진행을 모두 지우고 새 게임을 시작할까요?')){localStorage.removeItem(KEY);state=fresh();close();save();render();toast('새 게임을 시작했습니다.')}});
+document.querySelector('#dateBtn').onclick=()=>show(`<h2>💌 소개팅 제안</h2><p>친구가 소개팅을 주선해 주겠다고 합니다.</p><p>“정윤아, 이번 주말에 시간 돼?”</p><div class="modal-buttons"><button id="rejectDate">거절</button><button class="primary" id="acceptDate">수락</button></div>`);
+document.addEventListener('click',e=>{if(e.target.id==='rejectDate'){state.boredom=80;log('소개팅을 거절했다. 심심 지수 -20.');close();toast('소개팅을 거절했습니다.');save();render()}if(e.target.id==='acceptDate'){state.step=100;state.dateDone=true;state.boredom=0;log('💘 소개팅을 수락했다! Step 1 클리어.');show(`<h2>🎉 STEP 1 CLEAR!</h2><p>손정윤이 용기를 내 소개팅을 수락했습니다.</p><p>“그래… 한 번 나가보지 뭐.”</p><div class="modal-buttons"><button class="primary" data-close onclick="close()">계속하기</button></div>`);save();render()}});
+document.querySelector('#modalWrap').onclick=e=>{if(e.target.id==='modalWrap')close()};
+const away=Date.now()-state.lastSeen;if(away>5000){log(`오프라인 경과: 게임시간 ${Math.floor(away/realHour)}시간.`);sync();toast('오프라인 진행을 반영했습니다.')}save();render();setInterval(render,1000);setInterval(save,10000);addEventListener('beforeunload',save);
+</script>
+</body>
+</html>
